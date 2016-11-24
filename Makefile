@@ -8,7 +8,8 @@ LDFLAGS=-nostdlib -shared
 LDLIBS=-lc++abi
 
 LIB=ld.so
-SRC=main.cc
+SRC=main.cc \
+    env.cc
 ASM=crt1.S
 OBJ=${SRC:.cc=.o} ${ASM:.S=.o}
 
