@@ -9,7 +9,9 @@ LDLIBS=-lc++abi
 
 LIB=ld.so
 SRC=main.cc \
-    env.cc
+    env.cc  \
+    dynamic.cc
+
 ASM=crt1.S
 OBJ=${SRC:.cc=.o} ${ASM:.S=.o}
 

@@ -24,8 +24,7 @@ namespace ldso {
 
 #define unreachable(Message) unreachable_internal(Message, __LINE__, __FILE__)
 
-#undef assert
-#define assert(Cond)                                                           \
+#define ldso_assert(Cond)                                                      \
   do {                                                                         \
     if (!(Cond))                                                               \
       unreachable("Assert failed");                                            \
