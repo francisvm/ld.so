@@ -52,4 +52,12 @@ size_t strlen(const char *s) {
 
   return res;
 }
+
+int memcmp(const void *vl, const void *vr, size_t n) {
+  auto *l = static_cast<const unsigned char *>(vl),
+       *r = static_cast<const unsigned char *>(vr);
+  for (; n && *l == *r; n--, l++, r++)
+    ;
+  return n ? *l - *r : 0;
+}
 }

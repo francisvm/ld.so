@@ -5,20 +5,22 @@ CXXFLAGS=-std=c++1z -stdlib=libc++ -pedantic -Wall -Wextra -ffreestanding \
 	 -fno-exceptions -fno-rtti -fPIC -fvisibility=hidden -g
 CPPFLAGS=-MMD -Iinclude
 LDFLAGS=-nostdlib -shared
-LDLIBS=-lc++abi
 
 LIB=ld.so
-SRC=main.cc \
-    env.cc  \
-    dynamic.cc
-
+SRC=main.cc    \
+    env.cc     \
+    dynamic.cc \
+    dso.cc
+CPPSRC=vendor/hash.cpp
+CSRC=vendor/ceilf.c
 ASM=crt1.S
-OBJ=${SRC:.cc=.o} ${ASM:.S=.o}
+
+OBJ=${SRC:.cc=.o} ${CPPSRC:.cpp=.o} ${CSRC:.c=.o} ${ASM:.S=.o}
 
 all: ${LIB}
 
 ${LIB}: ${OBJ}
-	${CXX} $^ -o $@ ${LDFLAGS} ${LDLIBS}
+	${CXX} $^ -o $@ ${LDFLAGS}
 
 # Track makefile modifications.
 ${OBJ}: Makefile
