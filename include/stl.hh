@@ -2,6 +2,7 @@
 
 #include <allocator.hh>
 #include <llvm/ADT/ArrayRef.h>
+#include <llvm/ADT/StringRef.h>
 #include <set>
 #include <string>
 #include <unordered_set>
@@ -21,6 +22,8 @@ using unordered_set =
     std::unordered_set<T, std::hash<T>, std::equal_to<T>, ldso::allocator<T>>;
 
 template <typename T> using array_view = llvm::ArrayRef<T>;
+
+using string_view = llvm::StringRef;
 
 template <class InputIt, class OutputIt, class UnaryOperation,
           class UnaryPredicate>

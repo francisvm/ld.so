@@ -2,8 +2,8 @@
 
 #include <elf.h>
 #include <functional>
-#include <stl.hh>
 #include <utils.hh>
+#include <mapped_file.hh>
 
 namespace ldso {
 

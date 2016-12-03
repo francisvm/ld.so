@@ -2,6 +2,8 @@
 
 #include <cstring>
 #include <elf.h>
+#include <mapped_file.hh>
+#include <stl.hh>
 #include <utils.hh>
 
 namespace ldso::elf {
@@ -32,5 +34,12 @@ get_phdrs(const ldso::mapped_file<const Elf64_Ehdr> &file) {
   auto *ehdr = file.file;
   return {get<const Elf64_Phdr>(ehdr, ehdr->e_phoff), ehdr->e_phnum};
 }
+
+ldso::array_view<const Elf64_auxv_t> auxv(const void **argv);
+
+ldso::array_view<const char *> envp(const void **argv);
+
+ldso::array_view<const Elf64_Phdr>
+auxv_phdrs(ldso::array_view<const Elf64_auxv_t> auxvs);
 
 } // namespace ldso::elf

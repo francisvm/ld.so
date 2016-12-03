@@ -1,7 +1,7 @@
 #pragma once
 
 #include <syscall.hh>
-#include <utils.hh>
+#include <error.hh>
 
 namespace ldso {
 
