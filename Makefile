@@ -25,8 +25,15 @@ CSRC=vendor/ceilf.c  \
 ASM=crt1.S
 
 OBJ=${SRC:.cc=.o} ${CPPSRC:.cpp=.o} ${CSRC:.c=.o} ${ASM:.S=.o}
+DEP=${OBJ:.o=.d}
 
-all: ${LIB}
+LIBC_DIR=libc
+LIBC_ASM=crt1.S
+LIBC_OBJ=${LIBC_ASM:.S=.o}
+LIBC_OBJ:=$(addprefix ${LIBC_DIR}/,${LIBC_OBJ})
+LIBC_DEP=${LIBC_OBJ:.o=.d}
+
+all: ${LIB} ${LIBC_DIR}
 
 ${LIB}: ${OBJ}
 	${CXX} $^ -o $@ ${LDFLAGS}
@@ -34,4 +41,15 @@ ${LIB}: ${OBJ}
 # Track makefile modifications.
 ${OBJ}: Makefile
 
--include *.d
+-include ${DEP}
+
+${LIBC_DIR}: ${LIBC_OBJ}
+
+clean:
+	${RM} ${OBJ}
+	${RM} ${LIB}
+	${RM} ${DEP}
+	${RM} ${LIBC_OBJ}
+	${RM} ${LIBC_DEP}
+
+.PHONY: all clean ${LIBC_DIR}
