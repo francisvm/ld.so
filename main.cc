@@ -8,7 +8,7 @@
 #include <syscall.hh>
 #include <utils.hh>
 
-extern "C" void load(int, const char *argv[]) {
+extern "C" void load(int argc, const char *argv[]) {
 
   ldso::exe.auxv = ldso::elf::auxv(reinterpret_cast<const void **>(argv));
   ldso::exe.envp = ldso::elf::envp(reinterpret_cast<const void **>(argv));
@@ -25,7 +25,12 @@ extern "C" void load(int, const char *argv[]) {
       ldso::sys::write(STDOUT_FILENO, dso.name.c_str(), dso.name.size());
       ldso::sys::write(STDOUT_FILENO, "\n", 1);
     }
+    ldso::sys::_exit(0);
   }
 
-  ldso::sys::_exit(0);
+  auto main =
+      reinterpret_cast<int (*)(int, const char **, const char *const *)>(
+          ehdr->e_entry);
+
+  ldso::sys::_exit(main(argc, argv, ldso::exe.envp.data()));
 }
