@@ -8,7 +8,7 @@ namespace ldso {
 
 template <typename T> struct mapped_file {
   mapped_file(const char * filename) {
-    auto fd = sys::open(filename, O_RDONLY);
+    fd = sys::open(filename, O_RDONLY);
     if (fd < -1)
       unreachable("unable to open file");
 
@@ -35,8 +35,12 @@ template <typename T> struct mapped_file {
     if (sys::munmap(const_cast<void *>(reinterpret_cast<const void *>(file)),
                     size) < 0)
       unreachable("munmap failed");
+
+    if (close(fd) < 0)
+      unreachable("close failed");
   }
 
+  int fd = -1;
   T *file = nullptr;
   size_t size = 0;
 };

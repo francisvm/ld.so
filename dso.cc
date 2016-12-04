@@ -51,32 +51,65 @@ dso::dso(string name_in)
       std::find_if(phdrs.begin(), phdrs.end(), [](const Elf64_Phdr &phdr) {
         return phdr.p_type == PT_DYNAMIC;
       });
-  auto dyns = elf::dynamic::get_dyns(ehdr, found->p_offset);
+  dyns = elf::dynamic::get_dyns(ehdr, found->p_offset);
   auto strtab_off = std::find_if(dyns.begin(), dyns.end(), [](auto &dyn) {
     return dyn.d_tag == DT_STRTAB;
   });
+
   strtab = elf::get<const char>(ehdr, strtab_off->d_un.d_val);
+
+  auto symtab_off = std::find_if(dyns.begin(), dyns.end(), [](auto &dyn) {
+    return dyn.d_tag == DT_SYMTAB;
+  });
+
+  symtab = elf::dynamic::get_symtab(ehdr, symtab_off->d_un.d_val);
 }
 
 segment dso::load_segment(const Elf64_Phdr &phdr) {
-  auto *mapped = static_cast<uint8_t *>(
-      sys::mmap(NULL, phdr.p_memsz, PROT_READ | PROT_WRITE,
-                MAP_PRIVATE | MAP_ANONYMOUS, -1, 0));
-  ldso_assert(mapped != MAP_FAILED);
+  // RE segments can be backed by the file.
+  if (phdr.p_flags == (PF_X | PF_R)) {
+    ldso_assert(phdr.p_memsz == phdr.p_filesz);
+    auto *file = static_cast<uint8_t *>(
+        sys::mmap(NULL, phdr.p_memsz, PROT_READ | PROT_EXEC, MAP_PRIVATE,
+                  this->file.fd, phdr.p_offset));
+    ldso_assert(file != MAP_FAILED);
 
-  auto *segment = elf::get<const uint8_t>(file.file, phdr.p_offset);
+    return {file, phdr.p_vaddr, phdr.p_vaddr + phdr.p_memsz};
+  } else {
+    auto *map = static_cast<uint8_t *>(
+        sys::mmap(NULL, phdr.p_memsz, PROT_READ | PROT_WRITE,
+                  MAP_PRIVATE | MAP_ANONYMOUS, -1, 0));
+    ldso_assert(map != MAP_FAILED);
+    auto *segment = elf::get<const uint8_t>(file.file, phdr.p_offset);
+    memcpy(map, segment, phdr.p_filesz);
+    auto prot = phdr.p_flags & PF_X ? PROT_EXEC : 0;
+    prot = prot | (phdr.p_flags & PF_W ? PROT_WRITE : 0);
+    prot = prot | (phdr.p_flags & PF_R ? PROT_READ : 0);
 
-  memcpy(mapped, segment, phdr.p_filesz);
-  memset(mapped + phdr.p_filesz, 0, phdr.p_memsz - phdr.p_filesz);
+    if (prot != (PROT_READ | PROT_WRITE))
+      sys::mprotect(map, phdr.p_memsz, prot);
 
-  auto prot = phdr.p_flags & PF_X ? PROT_EXEC : 0;
-  prot = prot | (phdr.p_flags & PF_W ? PROT_WRITE : 0);
-  prot = prot | (phdr.p_flags & PF_R ? PROT_READ : 0);
+    return {map, phdr.p_vaddr, phdr.p_vaddr + phdr.p_memsz};
+  }
+}
 
-  if (prot != (PROT_READ | PROT_WRITE))
-    sys::mprotect(mapped, phdr.p_memsz, prot);
+dso::sym_t dso::symbol(string_view str) const {
+  auto find = std::find_if(symtab.begin(), symtab.end(), [&](auto &sym) {
+    return strtab + sym.st_name == str;
+  });
 
-  return {mapped, phdr.p_vaddr, phdr.p_vaddr + phdr.p_memsz};
+  if (find == symtab.end())
+    return nullptr;
+
+  auto off = find->st_value;
+  auto segment =
+      std::find_if(segments.begin(), segments.end(), [&](auto &segm) {
+        return off >= segm.begin_off && off <= segm.end_off;
+      });
+
+  assert(segment != segments.end());
+
+  return segment->file + off - segment->begin_off;
 }
 
 } // namespace ldso

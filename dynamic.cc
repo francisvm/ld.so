@@ -12,4 +12,14 @@ array_view<const Elf64_Dyn> get_dyns(const Elf64_Ehdr *ehdr,
 
   return {b, e};
 }
+
+array_view<const Elf64_Sym> get_symtab(const Elf64_Ehdr *ehdr,
+                                     const Elf64_Off off) {
+  auto b = get<const Elf64_Sym>(ehdr, off);
+  auto e = std::find_if(std::next(b), reinterpret_cast<const Elf64_Sym *>(-1),
+                        [](auto &sym) { return sym.st_info == 0; });
+
+  return {b, e};
+}
+
 } // namespace ldso::dynamic
