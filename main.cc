@@ -9,7 +9,6 @@
 #include <utils.hh>
 
 extern "C" void load(int argc, const char *argv[]) {
-
   ldso::exe.auxv = ldso::elf::auxv(reinterpret_cast<const void **>(argv));
   ldso::exe.envp = ldso::elf::envp(reinterpret_cast<const void **>(argv));
 

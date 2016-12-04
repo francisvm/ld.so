@@ -4,15 +4,15 @@
 
 namespace ldso {
 
-void build_graph(const Elf64_Ehdr *ehdr, ldso::unordered_set<dso> &dsos) {
-  auto phb = ldso::elf::get<const Elf64_Phdr>(ehdr, ehdr->e_phoff);
-  auto phdrs = ldso::array_view<const Elf64_Phdr>(phb, ehdr->e_phnum);
+void build_graph(const Elf64_Ehdr *ehdr, unordered_set<dso> &dsos) {
+  auto phb = elf::get<const Elf64_Phdr>(ehdr, ehdr->e_phoff);
+  auto phdrs = array_view<const Elf64_Phdr>(phb, ehdr->e_phnum);
   auto found =
       std::find_if(phdrs.begin(), phdrs.end(), [](const Elf64_Phdr &phdr) {
         return phdr.p_type == PT_DYNAMIC;
       });
   ldso_assert(found != phdrs.end() && "No dynamic phdr found.");
-  auto dyns = ldso::elf::dynamic::get_dyns(ehdr, found->p_offset);
+  auto dyns = elf::dynamic::get_dyns(ehdr, found->p_offset);
   auto strtab_off = std::find_if(dyns.begin(), dyns.end(), [](auto &dyn) {
     return dyn.d_tag == DT_STRTAB;
   });
@@ -22,7 +22,7 @@ void build_graph(const Elf64_Ehdr *ehdr, ldso::unordered_set<dso> &dsos) {
     if (ehdr->e_type == ET_EXEC)
       return reinterpret_cast<const char *>(strtab_off->d_un.d_val);
     else if (ehdr->e_type == ET_DYN)
-      return ldso::elf::get<const char>(ehdr, strtab_off->d_un.d_val);
+      return elf::get<const char>(ehdr, strtab_off->d_un.d_val);
     else
       unreachable("Unsupported ELF type");
   }();
@@ -38,25 +38,24 @@ void build_graph(const Elf64_Ehdr *ehdr, ldso::unordered_set<dso> &dsos) {
   }
 }
 
-dso::dso(ldso::string name_in)
-    : file{(ldso::string{"/lib/"} + name_in).c_str()},
-      name{std::move(name_in)} {
+dso::dso(string name_in)
+    : file{(string{"/lib/"} + name_in).c_str()}, name{std::move(name_in)} {
   auto ehdr = file.file;
-  auto phb = ldso::elf::get<const Elf64_Phdr>(ehdr, ehdr->e_phoff);
-  auto phdrs = ldso::array_view<const Elf64_Phdr>(phb, ehdr->e_phnum);
-  ldso::transform_if(phdrs.begin(), phdrs.end(), std::back_inserter(segments),
-                     [this](auto &phdr) { return load_segment(phdr); },
-                     [](auto &phdr) { return phdr.p_type == PT_LOAD; });
+  auto phb = elf::get<const Elf64_Phdr>(ehdr, ehdr->e_phoff);
+  auto phdrs = array_view<const Elf64_Phdr>(phb, ehdr->e_phnum);
+  transform_if(phdrs.begin(), phdrs.end(), std::back_inserter(segments),
+               [this](auto &phdr) { return load_segment(phdr); },
+               [](auto &phdr) { return phdr.p_type == PT_LOAD; });
 
   auto found =
       std::find_if(phdrs.begin(), phdrs.end(), [](const Elf64_Phdr &phdr) {
         return phdr.p_type == PT_DYNAMIC;
       });
-  auto dyns = ldso::elf::dynamic::get_dyns(ehdr, found->p_offset);
+  auto dyns = elf::dynamic::get_dyns(ehdr, found->p_offset);
   auto strtab_off = std::find_if(dyns.begin(), dyns.end(), [](auto &dyn) {
     return dyn.d_tag == DT_STRTAB;
   });
-  strtab = ldso::elf::get<const char>(ehdr, strtab_off->d_un.d_val);
+  strtab = elf::get<const char>(ehdr, strtab_off->d_un.d_val);
 }
 
 segment dso::load_segment(const Elf64_Phdr &phdr) {

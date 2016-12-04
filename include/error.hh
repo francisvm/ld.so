@@ -1,7 +1,7 @@
 #pragma once
 
-#include <unistd.h>
 #include <syscall.hh>
+#include <unistd.h>
 
 namespace ldso {
 

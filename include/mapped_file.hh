@@ -18,8 +18,8 @@ template <typename T> struct mapped_file {
 
     size = s.st_size;
 
-    file =
-        static_cast<T *>(sys::mmap(NULL, size, PROT_READ, MAP_PRIVATE, fd, 0));
+    file = static_cast<T *>(
+        sys::mmap(nullptr, size, PROT_READ, MAP_PRIVATE, fd, 0));
     if (file == MAP_FAILED)
       unreachable("unable to mmap file");
   }

@@ -1,7 +1,7 @@
 #pragma once
 
-#include <syscall.hh>
 #include <error.hh>
+#include <syscall.hh>
 
 namespace ldso {
 
@@ -29,7 +29,7 @@ template <typename T> struct allocator {
 
   T *allocate(size_t nb) {
     // mmap for sizes >= page_size / 2.
-    if (auto n = nb * sizeof (T); n >= page_size / 2) {
+    if (auto n = nb * sizeof(T); n >= page_size / 2) {
       if (auto *mem = new_page(n); mem == MAP_FAILED)
         unreachable("allocator mmap failed");
       else

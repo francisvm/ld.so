@@ -10,16 +10,15 @@
 
 namespace ldso {
 
-template <typename T> using vector = std::vector<T, ldso::allocator<T>>;
+template <typename T> using vector = std::vector<T, allocator<T>>;
 
-template <typename T> using set = std::set<T, ldso::allocator<T>>;
+template <typename T> using set = std::set<T, allocator<T>>;
 
-using string =
-    std::basic_string<char, std::char_traits<char>, ldso::allocator<char>>;
+using string = std::basic_string<char, std::char_traits<char>, allocator<char>>;
 
 template <typename T>
 using unordered_set =
-    std::unordered_set<T, std::hash<T>, std::equal_to<T>, ldso::allocator<T>>;
+    std::unordered_set<T, std::hash<T>, std::equal_to<T>, allocator<T>>;
 
 template <typename T> using array_view = llvm::ArrayRef<T>;
 

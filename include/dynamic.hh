@@ -6,7 +6,6 @@
 
 namespace ldso::elf::dynamic {
 
-ldso::array_view<const Elf64_Dyn> get_dyns(const Elf64_Ehdr *ehdr,
-                                           const Elf64_Off off);
+array_view<const Elf64_Dyn> get_dyns(const Elf64_Ehdr *, const Elf64_Off);
 
 } // namespace ldso::elf::dynamic

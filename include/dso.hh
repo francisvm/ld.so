@@ -2,8 +2,8 @@
 
 #include <elf.h>
 #include <functional>
-#include <utils.hh>
 #include <mapped_file.hh>
+#include <utils.hh>
 
 namespace ldso {
 
@@ -14,23 +14,24 @@ struct segment {
 };
 
 struct dso {
-  dso(ldso::string name_in);
+  dso(string);
   mapped_file<const Elf64_Ehdr> file;
-  ldso::string name;
-  ldso::unordered_set<const dso *> deps;
+  string name;
+  unordered_set<const dso *> deps;
   const char *strtab;
-  ldso::vector<segment> segments;
+  vector<segment> segments;
 
-  segment load_segment(const Elf64_Phdr &phdr);
+  segment load_segment(const Elf64_Phdr &);
 };
 
 inline bool operator==(const dso &a, const dso &b) { return a.name == b.name; }
 
-void build_graph(const Elf64_Ehdr *ehdr, ldso::unordered_set<dso> &dsos);
+void build_graph(const Elf64_Ehdr *, unordered_set<dso> &);
 
 } // namespace ldso
 
 namespace std {
+
 template <> struct hash<ldso::dso> {
   using argument_type = ldso::dso;
   using result_type = std::size_t;
@@ -38,4 +39,5 @@ template <> struct hash<ldso::dso> {
     return std::hash<ldso::string>{}(s.name);
   }
 };
+
 } // namespace std

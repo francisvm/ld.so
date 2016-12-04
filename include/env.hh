@@ -3,6 +3,7 @@
 #include <stl.hh>
 
 namespace ldso {
+
 struct program {
   array_view<const Elf64_auxv_t> auxv;
   array_view<const char *> envp;
@@ -19,4 +20,5 @@ inline string_view get_env(string_view name) {
     return {};
   return string_view{*found}.split('=').second;
 }
+
 } // namespace ldso

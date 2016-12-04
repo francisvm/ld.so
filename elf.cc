@@ -3,7 +3,7 @@
 
 namespace ldso::elf {
 
-ldso::array_view<const Elf64_auxv_t> auxv(const void **argv) {
+array_view<const Elf64_auxv_t> auxv(const void **argv) {
   while (*argv) // skip argv.
     ++argv;
   ++argv;
@@ -17,19 +17,18 @@ ldso::array_view<const Elf64_auxv_t> auxv(const void **argv) {
   return {begin, end};
 }
 
-ldso::array_view<const char *> envp(const void **argv) {
+array_view<const char *> envp(const void **argv) {
   while (*argv) // skip argv.
     ++argv;
   ++argv;
-  ldso::array_view<string_view> res;
+  array_view<string_view> res;
   auto begin = reinterpret_cast<const char **>(argv);
   auto end = std::find(begin, reinterpret_cast<const char **>(-1), nullptr);
 
   return {begin, end};
 }
 
-ldso::array_view<const Elf64_Phdr>
-auxv_phdrs(ldso::array_view<const Elf64_auxv_t> auxvs) {
+array_view<const Elf64_Phdr> auxv_phdrs(array_view<const Elf64_auxv_t> auxvs) {
   auto phnum = std::find_if(auxvs.begin(), auxvs.end(), [](auto &auxv) {
                  return auxv.a_type == AT_PHNUM;
                })->a_un.a_val;
