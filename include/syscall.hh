@@ -17,5 +17,7 @@ static inline auto fstat =
     detail::syscall<__NR_fstat, int(int, struct stat *)>{};
 static inline auto write =
     detail::syscall<__NR_write, ssize_t(int, const void *, size_t)>{};
+static inline auto mprotect =
+    detail::syscall<__NR_mprotect, int(void *, size_t, int)>{};
 
 } // namespace ldso::sys
