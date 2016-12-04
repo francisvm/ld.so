@@ -9,18 +9,7 @@
 namespace ldso::elf {
 
 template <typename Dst, typename Src, typename Size>
-static std::enable_if_t<!std::experimental::is_same_v<Src, Elf64_Ehdr>, Dst *>
-get(Src *ptr, Size off) {
-  if constexpr (std::experimental::is_const_v<Dst>)
-    return reinterpret_cast<Dst *>(reinterpret_cast<const char *>(ptr) + off);
-  else
-    return reinterpret_cast<Dst *>(reinterpret_cast<char *>(ptr) + off);
-}
-
-template <typename Dst, typename Src, typename Size>
-static std::enable_if_t<std::experimental::is_same_v<Src, Elf64_Ehdr>, Dst *>
-get(Src *ehdr, Size off) {
-  ldso_assert(strcmp(reinterpret_cast<char *>(ehdr->e_ident), ELFMAG));
+static Dst *get(Src *ehdr, Size off) {
   if constexpr (std::experimental::is_const_v<Dst>)
     return reinterpret_cast<Dst *>(reinterpret_cast<const char *>(ehdr) + off);
   else

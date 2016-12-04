@@ -16,8 +16,10 @@ extern "C" void load(int argc, const char *argv[]) {
   auto *ehdr = reinterpret_cast<const Elf64_Ehdr *>(
       reinterpret_cast<const char *>(phdrs.begin()) - sizeof(Elf64_Ehdr));
 
+  ldso::bin exe{ehdr};
+
   ldso::unordered_set<ldso::dso> dsos;
-  build_graph(ehdr, dsos);
+  build_graph(exe, dsos);
 
   if (auto trace = ldso::get_env("LD_TRACE_LOADED_OBJECTS"); trace == "1") {
     for (auto &dso : dsos) {

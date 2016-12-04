@@ -40,6 +40,9 @@ template <typename T> struct mapped_file {
       unreachable("close failed");
   }
 
+  operator const T *() const { return file; }
+  operator T *() { return file; }
+
   int fd = -1;
   T *file = nullptr;
   size_t size = 0;
