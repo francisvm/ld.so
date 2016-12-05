@@ -9,11 +9,7 @@
 
 namespace ldso {
 
-struct segment {
-  uint8_t *file;
-  size_t begin_off;
-  size_t end_off;
-};
+using sym_t = void *;
 
 struct dso {
   dso(string);
@@ -23,11 +19,10 @@ struct dso {
   array_view<const Elf64_Dyn> dyns;
   const char *strtab;
   array_view<const Elf64_Sym> symtab;
-  vector<segment> segments;
+  uint8_t *segments = nullptr;
 
-  segment load_segment(const Elf64_Phdr &);
+  uint8_t *load_segments(const array_view<const Elf64_Phdr> &);
 
-  using sym_t = void *;
   sym_t symbol(string_view) const;
 };
 

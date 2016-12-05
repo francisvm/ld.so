@@ -11,7 +11,8 @@ SRC=main.cc    \
     env.cc     \
     dynamic.cc \
     dso.cc     \
-    elf.cc
+    elf.cc     \
+    relocations.cc
 CPPSRC=vendor/hash.cpp
 CSRC=vendor/ceilf.c  \
      vendor/memchr.c \

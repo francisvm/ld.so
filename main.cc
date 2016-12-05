@@ -22,8 +22,6 @@ extern "C" void load(int argc, const char *argv[]) {
   ldso::unordered_set<ldso::dso> dsos;
   build_graph(exe, dsos);
 
-  auto i = dsos.begin()->symbol("foo");
-
   if (auto trace = ldso::get_env("LD_TRACE_LOADED_OBJECTS"); trace == "1") {
     for (auto &dso : dsos) {
       ldso::sys::write(STDOUT_FILENO, dso.name.c_str(), dso.name.size());
@@ -32,7 +30,11 @@ extern "C" void load(int argc, const char *argv[]) {
     ldso::sys::_exit(0);
   }
 
+  // Relocate the binary.
   relocate(exe);
+  // Relocate all the dsos.
+  for (auto& dso : dsos)
+    relocate(dso);
 
   auto main =
       reinterpret_cast<int (*)(int, const char **, const char *const *)>(
