@@ -5,7 +5,9 @@
 namespace ldso {
 
 dso::dso(string name_in)
-    : file{(string{"/lib/"} + name_in).c_str()}, name{std::move(name_in)} {
+    : file{(string{name_in == "libsimple.so" ? "test/" : "/lib/"} + name_in)
+               .c_str()},
+      name{std::move(name_in)} {
   auto ehdr = file.file;
   auto phb = elf::get<const Elf64_Phdr>(ehdr, ehdr->e_phoff);
   auto phdrs = array_view<const Elf64_Phdr>(phb, ehdr->e_phnum);
